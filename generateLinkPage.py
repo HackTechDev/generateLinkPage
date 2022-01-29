@@ -5,8 +5,9 @@ import fileinput
 import pandas as pd
 import urllib.request
 from urllib.parse import urlparse
+from urllib.request import Request, urlopen
 from bs4 import BeautifulSoup
-
+from urllib.request import Request, urlopen
 
 def get_page(url):
     response = urllib.request.urlopen(url)
@@ -41,8 +42,10 @@ def get_og_image(soup):
     return
 
 link = sys.argv[1]
-
-soup = get_page(link)
+hdr = {'User-Agent': 'Mozilla/5.0'}
+req = Request(link,headers=hdr)
+page = urlopen(req)
+soup = BeautifulSoup(page, 'html5lib')
 
 og_title = get_og_title(soup)
 print(og_title)
@@ -55,12 +58,54 @@ print(og_image)
 
 print("Add link:" + link)
 
-if og_title is None:
-  linkFormatting = '* <a href="' + link + '" target="_blank">' + link + '</a><br/>\n\n'
-else:
-  linkFormatting = '* <a href="' + link + '" target="_blank">' + og_title + '</a><br/>\n' + og_description + '<br/>\n<img src="' + og_image +'" title="' + og_title + '" width="100px"><br/>\n\n'
+with open("link.txt","a+") as file:
+    file.write(link + '\n')
 
-#print(linkFormatting)
+if og_title is None:
+  linkFormatting = """
+<table style="border-style: hidden;padding: 0px !important">
+  <tr style="padding: 0px !important">
+    <td rowspan="2" style="padding-top: 0px;padding-bottom: 0px: padding: 0px !important;width: 100px">
+      <div style="display: flex">
+        <div style="margin-right: 10px">*</div> 
+        <div><a href="' + %s + '" target="_blank">%s</a></div>
+      </div>
+
+    </td>
+    <td style="border-style: hidden;padding-top: 0px;padding-bottom: 0px; padding: 0px !important">  
+    </td>
+  </tr>
+  <tr style="border-style: hidden;padding: 0px !important"> 
+    <td style="border-style: hidden;padding-top: 0px;padding-bottom: 0px; padding: 0px !important">
+    </td>
+  </tr>
+</table>\n
+""" % (link, link)
+else:
+  linkFormatting = """
+<table style="border-style: hidden;padding: 0px !important">
+  <tr style="padding: 0px !important">
+    <td rowspan="2" style="padding-top: 0px;padding-bottom: 0px: padding: 0px !important;width: 100px">
+      <div style="display: flex">
+        <div style="margin-right: 10px">*</div> 
+        <div>
+          <img src="%s" title="%s" width="100px" style="margin-top: 0px; margin-bottom: 0px">
+        </div>
+      </div>
+    </td>
+    <td style="border-style: hidden;padding-top: 0px;padding-bottom: 0px; padding: 0px !important">  
+      <a href="' + %s + '" target="_blank">%s</a> 
+    </td>
+  </tr>
+  <tr style="border-style: hidden;padding: 0px !important"> 
+    <td style="border-style: hidden;padding-top: 0px;padding-bottom: 0px; padding: 0px !important">
+    %s
+    </td>
+  </tr>
+</table>\n
+""" % (og_image, og_title, link, og_title, og_description)
+
+print(linkFormatting)
 
 for line in fileinput.FileInput("item.md", inplace=1):
     if "Liens :" in line:
