@@ -56,6 +56,9 @@ print(og_site_name)
 og_image = get_og_image(soup)
 print(og_image)
 
+if og_image is None:
+  og_image = "/carnet/liens/b.png"
+
 print("Add link:" + link)
 
 with open("link.txt","a+") as file:
@@ -65,10 +68,10 @@ if og_title is None:
   linkFormatting = """
 <table style="border-style: hidden;padding: 0px !important">
   <tr style="padding: 0px !important">
-    <td rowspan="2" style="padding-top: 0px;padding-bottom: 0px: padding: 0px !important;width: 100px">
+    <td rowspan="2" style="padding-top: 0px;padding-bottom: 0px: padding: 0px !important;width: 200px">
       <div style="display: flex">
         <div style="margin-right: 10px">*</div> 
-        <div><a href="' + %s + '" target="_blank">%s</a></div>
+        <div><a href="%s" target="_blank">%s</a></div>
       </div>
 
     </td>
@@ -85,16 +88,18 @@ else:
   linkFormatting = """
 <table style="border-style: hidden;padding: 0px !important">
   <tr style="padding: 0px !important">
-    <td rowspan="2" style="padding-top: 0px;padding-bottom: 0px: padding: 0px !important;width: 100px">
+    <td rowspan="2" style="padding-top: 0px;padding-bottom: 0px: padding: 0px !important;width: 200px">
       <div style="display: flex">
         <div style="margin-right: 10px">*</div> 
         <div>
-          <img src="%s" title="%s" width="100px" style="margin-top: 0px; margin-bottom: 0px">
+          <a href="%s" target="_blank">
+            <img src="%s" title="%s" width="200px" style="margin-top: 0px; margin-bottom: 0px">
+          </a>
         </div>
       </div>
     </td>
     <td style="border-style: hidden;padding-top: 0px;padding-bottom: 0px; padding: 0px !important">  
-      <a href="' + %s + '" target="_blank">%s</a> 
+      <a href="%s" target="_blank">%s</a> 
     </td>
   </tr>
   <tr style="border-style: hidden;padding: 0px !important"> 
@@ -103,9 +108,9 @@ else:
     </td>
   </tr>
 </table>\n
-""" % (og_image, og_title, link, og_title, og_description)
+""" % (link, og_image, og_title, link, og_title, og_description)
 
-print(linkFormatting)
+#print(linkFormatting)
 
 for line in fileinput.FileInput("item.md", inplace=1):
     if "Liens :" in line:
